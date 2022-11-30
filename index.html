@@ -22,8 +22,13 @@
             .login_hint {
                 color: lightcoral;
             }
+            .hint {
+                color: grey;
+                font-size: small;
+            }
         </style>
         <script language="JavaScript">
+            // default values
             const path = '/oauth/v2/authorize?'
             let allScopes = ['email', 'profile', 'address', 'offline_access', 'urn:zitadel:iam:org:project:id:zitadel:aud', 'urn:zitadel:iam:user:metadata', 'urn:zitadel:iam:user:resourceowner']
             let domain = "https://mydomain-xyza.zitadel.cloud"
@@ -34,6 +39,7 @@
             let a_prompt = ''
             let login_hint = 'max+zitadel@zitadel.com'
             let orgid = 170086824411201793
+
             function init() {
                 // Scopes
                 let list = document.getElementById("list_scopes");
@@ -142,7 +148,7 @@
                 if (a_prompt != '') href = href + '&prompt=' + a_prompt
                 if (a_prompt === 'select_account') href = href + '&login_hint=' + login_hint
                 output_encoded.innerHTML = encodeURI(href)
-                output_link.href = href
+                output_link.href = encodeURI(href)
             }
         </script>
     </head>
@@ -151,23 +157,30 @@
         <h1>ZITADEL Auth Request</h1>
 
         <h2>Required parameters</h2>
+        <div>
+            <label for="domain" class="domain">Your domain:</label><br />
+            <input type="text" id="domain" name="domain" onchange="setDomain(this)">
+            <span class="hint">The domain of your zitadel instance</span>
+        </div>
+        
+        <div>
+            <label for="client_id" class="client_id">Client id:</label><br />
+            <input type="text" id="client_id" name="client_id" value="" onchange="setClientId(this)">
+            <span class="hint">This is the resource id of an application. It's the application where you want your users to login. You can find the resource id in the Console. When using organization grants, use the client id from the origin organization.</span>
+        </div>
+        <div>
+            <label for="redirect_uri" class="redirect_uri">Redirect URI</label><br />
+            <input type="text" id="redirect_uri" name="redirect_uri" value="" onchange="setRedirectUri(this)">
+            <span class="hint">Must be one of the pre-configured redirect uris for your application. You can configure the redirect uri in Console (or via API).</span>
+        </div>
 
-        <label for="domain" class="domain">Your domain:</label><br />
-        <input type="text" id="domain" name="domain" onchange="setDomain(this)"><br />
-
-        <label for="client_id" class="client_id">Client id:</label><br />
-        <input type="text" id="client_id" name="client_id" value="" onchange="setClientId(this)"><br />
-
-        <label for="redirect_uri" class="redirect_uri">Redirect URI</label><br />
-        <span>Needs to be configured in Console</span><br />
-        <input type="text" id="redirect_uri" name="redirect_uri" value="" onchange="setRedirectUri(this)"><br />
-
-        <label for="response_type">Response Type (<a target="_blank" href="https://docs.zitadel.com/docs/apis/openidoauth/endpoints#required-request-parameters">help</a>):</label><br />
+        <label for="response_type">Response Type:</label><br />
         <select name="response_type" id="response_type" onchange="setResponseType(this)">
             <option value="code">code</option>
             <option value="id_token token">id_token token</option>
             <option value="id_token">id_token</option>
         </select>
+        <span class="hint">Determines whether a code, id_token token or just id_token will be returned. Most use cases will need code. More in the<a target="_blank" href="hhttps://docs.zitadel.com/docs/apis/openidoauth/endpoints#required-request-parameters">documentation</a></span>
 
         <h2>Additional parameters</h2>
 
@@ -179,24 +192,29 @@
             <option value="select_account">select_account</option>
             <option value="create">create</option>
         </select>
+        <span class="hint">Define if and how the user should be prompted on login. For example you can pre-select a login name or present the register form to users directly. More in the<a target="_blank" href="https://docs.zitadel.com/docs/apis/openidoauth/endpoints#additional-parameters">documentation</a></span>
         <br />
 
         <div id="login_hint_optional" class="login_hint" hidden>
             <label for="login_hint">Login hint:</label><br />
-            <input type="text" id="login_hint" name="login_hint" value="" placeholder="max+zitadel@zitadel.com" onchange="setLoginHint(this)"><br />
+            <input type="text" id="login_hint" name="login_hint" value="" placeholder="max+zitadel@zitadel.com" onchange="setLoginHint(this)">
+            <span class="hint">A valid logon name of a user. Will be used for username inputs or preselecting a user on select_account. </span>
         </div>
 
         <h2>Scopes</h2>
-        <label for="scope" class="scope">Scopes (<a target="_blank" href="https://docs.zitadel.com/docs/apis/openidoauth/scopes">help</a>):</label><br />
+        <label for="scope" class="scope">Scopes:</label><br />
+        <span class="hint">Request additional information about the user with scopes. The claims (results of scopes) will be returned on the userinfo_endpoint or in the token (when configured). See all available scopes in our <a target="_blank" href="https://docs.zitadel.com/docs/apis/openidoauth/scopes">documentation</a></span>
         <div id="list_scopes">
             <input type="checkbox" id="scope_openid" name="scopes" value="openid" checked disabled>
             <label for="scope_openid">openid</label>
             <br />
         </div>
         <br />
+
         <div id="orgid_optional">
             <label for="orgid">Organization Id:</label><br />
-            <input type="text" id="orgid" name="orgid" value="" onchange="setOrgId(this)"><br />
+            <input type="text" id="orgid" name="orgid" value="" onchange="setOrgId(this)">
+            <span class="hint">When requesting the scope `urn:zitadel:iam:org:id:{id}`, ZITADEL will enforce that the user is a member of the selected organization. This will also ensure that all organization settings, such as branding, login policy, etc. are being applied directly.</span>
         </div>
 
         <h2>Auth Request</h2>
