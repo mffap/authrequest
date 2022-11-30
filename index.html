@@ -10,12 +10,13 @@
             let allScopes = ['email', 'profile', 'address', 'offline_access', 'urn:zitadel:iam:org:project:id:zitadel:aud', 'urn:zitadel:iam:user:metadata', 'urn:zitadel:iam:user:resourceowner']
             let domain = "https://mydomain-xyza.zitadel.cloud"
             let response_type = 'code'
-            let client_id = '12345678@something'
+            let client_id = '170086824411201793@yourapp'
             let scopes = ['openid']
             let redirect_uri = 'http://localhost:8080/api/auth/callback/zitadel'
             let a_prompt = ''
             let login_hint = 'max+zitadel@zitadel.com'
             function init() {
+                // Scopes
                 let list = document.getElementById("list_scopes");
                 allScopes.forEach((scope)=>{
                     let li = document.createElement("div");
@@ -27,6 +28,13 @@
                     list.appendChild(li);
                 })
                 updateAuthReq()
+
+                // Placeholder values
+                document.getElementById("domain").placeholder = domain;
+                document.getElementById("client_id").placeholder = client_id;
+                document.getElementById("redirect_uri").placeholder = redirect_uri;
+                document.getElementById("login_hint").placeholder = login_hint;
+                document.getElementById("orgid").placeholder = orgid;
             }
             function setDomain(input) {
                 domain = input.value;
@@ -115,14 +123,14 @@
         <h2>Required parameters</h2>
 
         <label for="domain">Your domain:</label><br />
-        <input type="text" id="domain" name="domain" placeholder="https://mydomain-xyza.zitadel.cloud" onchange="setDomain(this)"><br />
+        <input type="text" id="domain" name="domain" onchange="setDomain(this)"><br />
 
         <label for="client_id">Client id:</label><br />
-        <input type="text" id="client_id" name="client_id" value="" placeholder="12345678@something" onchange="setClientId(this)"><br />
+        <input type="text" id="client_id" name="client_id" value="" onchange="setClientId(this)"><br />
 
         <label for="clientId">Redirect URI</label><br />
         <span>Needs to be configured in Console</span><br />
-        <input type="text" id="redirect_uri" name="redirect_uri" value="" placeholder="http://localhost:8080/api/auth/callback/zitadel" onchange="setRedirectUri(this)"><br />
+        <input type="text" id="redirect_uri" name="redirect_uri" value="" onchange="setRedirectUri(this)"><br />
 
         <label for="response_type">Response Type (<a target="_blank" href="https://docs.zitadel.com/docs/apis/openidoauth/endpoints#required-request-parameters">help</a>):</label><br />
         <select name="response_type" id="response_type" onchange="setResponseType(this)">
@@ -158,7 +166,7 @@
         <br />
         <div id="orgid_optional">
             <label for="orgid">Organization Id:</label><br />
-            <input type="text" id="orgid" name="orgid" value="" placeholder="178204173316174381" onchange="setOrgId(this)"><br />
+            <input type="text" id="orgid" name="orgid" value="" onchange="setOrgId(this)"><br />
         </div>
 
         <h2>Auth Request</h2>
