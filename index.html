@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+    <head>
+        <style>
+            .error {
+                border: 2px solid red;
+            }
+        </style>
+        <script language="JavaScript">
+            const path = '/oauth/v2/authorize?'
+            let allScopes = ['email', 'profile', 'address', 'offline_access', 'urn:zitadel:iam:org:project:id:zitadel:aud', 'urn:zitadel:iam:user:metadata', 'urn:zitadel:iam:user:resourceowner']
+            let domain = "https://mydomain-xyza.zitadel.cloud"
+            let response_type = 'code'
+            let client_id = '12345678@something'
+            let scopes = ['openid']
+            let redirect_uri = 'http://localhost:8080/api/auth/callback/zitadel'
+            let a_prompt = ''
+            let login_hint = 'max+zitadel@zitadel.com'
+            function init() {
+                let list = document.getElementById("list_scopes");
+                allScopes.forEach((scope)=>{
+                    let li = document.createElement("div");
+                    li.innerHTML = `
+                        <input type="checkbox" id="scope_`+scope+`" name="scopes" value="`+scope+`" onchange="setScopes()">
+                        <label for="scope_`+scope+`">`+scope+`</label>
+                        <br />
+                        `;
+                    list.appendChild(li);
+                })
+                document.getElementById("orgid").value = orgid
+                updateAuthReq()
+            }
+            function setDomain(input) {
+                domain = input.value;
+                updateAuthReq()
+            }
+            function setClientId(input) {
+                let clientIdRegex = /\d.{17}@\w*/
+                if(!clientIdRegex.test(input.value)) {
+                    document.getElementById("client_id").classList.add('error')
+                } else {
+                    document.getElementById("client_id").classList.remove('error')
+                }
+                client_id = input.value;
+                updateAuthReq()
+            }
+            function setRedirectUri(input) {
+                redirect_uri = input.value;
+                updateAuthReq()
+            }
+            function setResponseType(input) {
+                response_type = input.value;
+                updateAuthReq()
+            } 
+            function setPrompt(input) {
+                a_prompt = input.value;
+                let lho = document.getElementById("login_hint_optional");
+                if (input.value !== 'select_account') {
+                    lho.hidden = true;
+                } else {
+                    lho.hidden = false;
+                }
+                updateAuthReq()
+            } 
+            function setLoginHint(input) {
+                login_hint = input.value
+                updateAuthReq()
+            }
+            function setOrgId(input) {
+                let current = 'urn:zitadel:iam:org:id:'+orgid
+                let new_scopes = scopes.filter(scope => scope !== current)
+                orgid = input.value
+                if(orgid !== '') new_scopes.push('urn:zitadel:iam:org:id:'+orgid)
+                scopes = new_scopes
+                updateAuthReq()
+            }
+            function setScopes() {
+                var checkboxes = document.querySelectorAll('input[type=checkbox]:checked')
+                scopes = []
+                for (var i = 0; i < checkboxes.length; i++) {
+                    scopes.push(checkboxes[i].value)
+                }
+                updateAuthReq()
+            }
+            function updateAuthReq() {
+                var output = document.getElementById("authrequest");
+                var output_encoded = document.getElementById("authrequest_encoded");
+                var output_link= document.getElementById("authrequest_link");
+                let html = domain + path + 
+                    'response_type=' + response_type + 
+                    '&client_id=' + client_id + 
+                    '&redirect_uri=' + redirect_uri + 
+                    '&scope=' + scopes.join(' ');
+                if (a_prompt != '') html = html + '&prompt=' + a_prompt
+                if (a_prompt === 'select_account') html = html + '&login_hint=' + login_hint
+                output.innerHTML = html
+                output_encoded.innerHTML = encodeURI(html)
+                output_link.href = html
+            }
+        </script>
+    </head>
+    
+    <body onload="init()">
+        <h1>ZITADEL Auth Request</h1>
+
+        <h2>Required parameters</h2>
+
+        <label for="domain">Your domain:</label><br />
+        <input type="text" id="domain" name="domain" placeholder="https://mydomain-xyza.zitadel.cloud" onchange="setDomain(this)"><br />
+
+        <label for="client_id">Client id:</label><br />
+        <input type="text" id="client_id" name="client_id" value="" placeholder="12345678@something" onchange="setClientId(this)"><br />
+
+        <label for="clientId">Redirect URI</label><br />
+        <span>Needs to be configured in Console</span><br />
+        <input type="text" id="redirect_uri" name="redirect_uri" value="" placeholder="http://localhost:8080/api/auth/callback/zitadel" onchange="setRedirectUri(this)"><br />
+
+        <label for="response_type">Response Type (<a target="_blank" href="https://docs.zitadel.com/docs/apis/openidoauth/endpoints#required-request-parameters">help</a>):</label><br />
+        <select name="response_type" id="response_type" onchange="setResponseType(this)">
+            <option value="code">code</option>
+            <option value="id_token token">id_token token</option>
+            <option value="id_token">id_token</option>
+        </select>
+
+        <h2>Additional parameters</h2>
+
+        <label for="prompt">Prompt:</label><br />
+        <select name="prompt" id="prompt" onchange="setPrompt(this)">
+            <option value="">no prompt</option>
+            <option value="none">none</option>
+            <option value="login">login</option>
+            <option value="select_account">select_account</option>
+            <option value="create">create</option>
+        </select>
+        <br />
+
+        <div id="login_hint_optional" hidden>
+            <label for="login_hint">Login hint:</label><br />
+            <input type="text" id="login_hint" name="login_hint" value="" placeholder="max+zitadel@zitadel.com" onchange="setLoginHint(this)"><br />
+        </div>
+
+        <h2>Scopes</h2>
+        <label for="scope">Scopes (<a target="_blank" href="https://docs.zitadel.com/docs/apis/openidoauth/scopes">help</a>):</label><br />
+        <div id="list_scopes">
+            <input type="checkbox" id="scope_openid" name="scopes" value="openid" checked disabled>
+            <label for="scope_openid">openid</label>
+            <br />
+        </div>
+        <br />
+        <div id="orgid_optional">
+            <label for="orgid">Organization Id:</label><br />
+            <input type="text" id="orgid" name="orgid" value="" placeholder="178204173316174381" onchange="setOrgId(this)"><br />
+        </div>
+
+        <h2>Auth Request</h2>
+
+        <p>
+            <code id="authrequest">Nothing</code><br />
+            <a href="" target="_blank" id="authrequest_link">Try it out</a> <!-- only show when required info is filled in -->
+        </p>
+
+        <p>
+            <span>Encoded:</span><br />
+            <code id="authrequest_encoded">Nothing</code>
+        </p>
+    </body>
+</html>
