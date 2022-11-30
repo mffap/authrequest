@@ -65,7 +65,7 @@
                 updateAuthReq()
             }
             function validateClientId(value) { 
-                let clientIdRegex = /\d{18}@\w*/
+                let clientIdRegex = /^\d{18}@\w*$/
                 if(!clientIdRegex.test(value)) {
                     document.getElementById("client_id").classList.toggle('error')
                 }
@@ -98,13 +98,15 @@
                 orgid = input.value
                 if(orgid !== '') new_scopes.push('urn:zitadel:iam:org:id:'+orgid)
                 scopes = new_scopes
-                validateOrgId()
+                validateOrgId(orgid)
                 updateAuthReq()
             }
             function validateOrgId(value) { 
-                let orgIdRegex = /\d{18}/
-                if(!orgIdRegex.test(value)) {
-                    document.getElementById("orgid").classList.toggle('error')
+                let orgIdRegex = /^\d{18}$/
+                if(orgIdRegex.test(value)) {
+                    document.getElementById("orgid").classList.remove('error')
+                } else {
+                    document.getElementById("orgid").classList.add('error')
                 }
             }
             function setScopes() {
