@@ -26,7 +26,6 @@
                         `;
                     list.appendChild(li);
                 })
-                document.getElementById("orgid").value = orgid
                 updateAuthReq()
             }
             function setDomain(input) {
@@ -34,14 +33,15 @@
                 updateAuthReq()
             }
             function setClientId(input) {
-                let clientIdRegex = /\d.{17}@\w*/
-                if(!clientIdRegex.test(input.value)) {
-                    document.getElementById("client_id").classList.add('error')
-                } else {
-                    document.getElementById("client_id").classList.remove('error')
-                }
+                validateClientId(input.value)
                 client_id = input.value;
                 updateAuthReq()
+            }
+            function validateClientId(value) { 
+                let clientIdRegex = /\d{18}@\w*/
+                if(!clientIdRegex.test(value)) {
+                    document.getElementById("client_id").classList.toggle('error')
+                }
             }
             function setRedirectUri(input) {
                 redirect_uri = input.value;
@@ -71,7 +71,14 @@
                 orgid = input.value
                 if(orgid !== '') new_scopes.push('urn:zitadel:iam:org:id:'+orgid)
                 scopes = new_scopes
+                validateOrgId()
                 updateAuthReq()
+            }
+            function validateOrgId(value) { 
+                let orgIdRegex = /\d{18}/
+                if(!orgIdRegex.test(value)) {
+                    document.getElementById("orgid").classList.toggle('error')
+                }
             }
             function setScopes() {
                 var checkboxes = document.querySelectorAll('input[type=checkbox]:checked')
@@ -80,6 +87,9 @@
                     scopes.push(checkboxes[i].value)
                 }
                 updateAuthReq()
+            }
+            function validate() {
+
             }
             function updateAuthReq() {
                 var output = document.getElementById("authrequest");
