@@ -4,6 +4,24 @@
             .error {
                 border: 2px solid red;
             }
+            .domain {
+                color: orange;
+            }
+            .client_id {
+                color: green;
+            }
+            .redirect_uri {
+                color: blue;
+            }
+            .scope {
+                color: violet;
+            }
+            .prompt {
+                color: red;
+            }
+            .login_hint {
+                color: lightcoral;
+            }
         </style>
         <script language="JavaScript">
             const path = '/oauth/v2/authorize?'
@@ -15,6 +33,7 @@
             let redirect_uri = 'http://localhost:8080/api/auth/callback/zitadel'
             let a_prompt = ''
             let login_hint = 'max+zitadel@zitadel.com'
+            let orgid = 170086824411201793
             function init() {
                 // Scopes
                 let list = document.getElementById("list_scopes");
@@ -103,16 +122,25 @@
                 var output = document.getElementById("authrequest");
                 var output_encoded = document.getElementById("authrequest_encoded");
                 var output_link= document.getElementById("authrequest_link");
-                let html = domain + path + 
+                let html = 
+                    '<span class="domain">' + domain + path + '</span>' +
+                    'response_type=' + response_type + 
+                    '<span class="client_id">&client_id=' + client_id + '</span>' +
+                    '<span class="redirect_uri">&redirect_uri=' + redirect_uri + '</span>' +
+                    '<span class="scope">&scope=' + scopes.join(' ')+ '</span>';
+                if (a_prompt != '') html = html + '<span class="prompt">&prompt=' + a_prompt + '</span>'
+                if (a_prompt === 'select_account') html = html + '<span class="login_hint">&login_hint=' + login_hint + '</span>'
+                output.innerHTML = html
+
+                let href = domain + path +
                     'response_type=' + response_type + 
                     '&client_id=' + client_id + 
                     '&redirect_uri=' + redirect_uri + 
                     '&scope=' + scopes.join(' ');
-                if (a_prompt != '') html = html + '&prompt=' + a_prompt
-                if (a_prompt === 'select_account') html = html + '&login_hint=' + login_hint
-                output.innerHTML = html
-                output_encoded.innerHTML = encodeURI(html)
-                output_link.href = html
+                if (a_prompt != '') href = href + '&prompt=' + a_prompt
+                if (a_prompt === 'select_account') href = href + '&login_hint=' + login_hint
+                output_encoded.innerHTML = encodeURI(href)
+                output_link.href = href
             }
         </script>
     </head>
@@ -122,13 +150,13 @@
 
         <h2>Required parameters</h2>
 
-        <label for="domain">Your domain:</label><br />
+        <label for="domain" class="domain">Your domain:</label><br />
         <input type="text" id="domain" name="domain" onchange="setDomain(this)"><br />
 
-        <label for="client_id">Client id:</label><br />
+        <label for="client_id" class="client_id">Client id:</label><br />
         <input type="text" id="client_id" name="client_id" value="" onchange="setClientId(this)"><br />
 
-        <label for="clientId">Redirect URI</label><br />
+        <label for="redirect_uri" class="redirect_uri">Redirect URI</label><br />
         <span>Needs to be configured in Console</span><br />
         <input type="text" id="redirect_uri" name="redirect_uri" value="" onchange="setRedirectUri(this)"><br />
 
@@ -141,7 +169,7 @@
 
         <h2>Additional parameters</h2>
 
-        <label for="prompt">Prompt:</label><br />
+        <label for="prompt" class="prompt">Prompt:</label><br />
         <select name="prompt" id="prompt" onchange="setPrompt(this)">
             <option value="">no prompt</option>
             <option value="none">none</option>
@@ -151,13 +179,13 @@
         </select>
         <br />
 
-        <div id="login_hint_optional" hidden>
+        <div id="login_hint_optional" class="login_hint" hidden>
             <label for="login_hint">Login hint:</label><br />
             <input type="text" id="login_hint" name="login_hint" value="" placeholder="max+zitadel@zitadel.com" onchange="setLoginHint(this)"><br />
         </div>
 
         <h2>Scopes</h2>
-        <label for="scope">Scopes (<a target="_blank" href="https://docs.zitadel.com/docs/apis/openidoauth/scopes">help</a>):</label><br />
+        <label for="scope" class="scope">Scopes (<a target="_blank" href="https://docs.zitadel.com/docs/apis/openidoauth/scopes">help</a>):</label><br />
         <div id="list_scopes">
             <input type="checkbox" id="scope_openid" name="scopes" value="openid" checked disabled>
             <label for="scope_openid">openid</label>
