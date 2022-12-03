@@ -1,0 +1,42 @@
+<html>
+    <script language="JavaScript">
+
+        let sha = ""
+        async function updateSha(input) {
+            const sha = await encodeCodeChallenge(input.value)
+            var output = document.getElementById("sha");
+            output.innerHTML = sha
+        }
+
+        // https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest#basic_example
+        async function string_to_sha256(message) {
+            // encode as UTF-8
+            const msgBuffer = new TextEncoder().encode(message);                    
+
+            // hash the message
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+
+            // return ArrayBuffer
+            return hashBuffer;
+        }
+        async function encodeCodeChallenge(codeChallange) {
+            let arrayBuffer = await string_to_sha256(codeChallange)
+            // https://stackoverflow.com/a/11562550
+            let base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+            let base54url = base64_to_base64url(base64)
+            return base54url
+            
+        }
+        var base64_to_base64url = function(input) {
+            input = input
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/g, '');
+            return input;
+        }
+    </script>
+    <p>
+        <input type="text" onchange="updateSha(this)"/>
+    <span id="sha">Nothing</span>
+    </p>
+<html>
